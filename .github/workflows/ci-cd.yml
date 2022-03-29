@@ -1,0 +1,40 @@
+name: Deploy to Firebase Hosting on merge
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Run npm install and build
+        run:
+          npm ci 
+          npm run build
+      - name: Upload build artifact
+        uses: action/upload-artifact@v2
+        with: 
+          name: build
+          path: build
+          retention-days: 1
+  deploy-to-production:
+    if: github.ref == 'refs/heads/maim'
+    needs: build
+    run-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Download build artifact
+        users: actions/download-artifact@v2
+        with:
+          name: build
+          path: build
+      - name: deploy to firebase hosting
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_DXT_MUI_DASHBOARD }}'
+          channelId: live
+          projectId: dxt-mui-dashboard
