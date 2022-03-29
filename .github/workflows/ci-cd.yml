@@ -1,9 +1,10 @@
-name: Deploy to Firebase Hosting on merge
+name: Continous Integration and Delevery
 on:
   push:
     branches: [main]
+
 jobs:
-  build:
+  test_build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -20,7 +21,7 @@ jobs:
           retention-days: 1
   deploy_to_production:
     if: github.ref == 'refs/heads/maim'
-    needs: build
+    needs: test_build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -31,7 +32,7 @@ jobs:
           name: build
           path: build
       - name: deploy to firebase hosting
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_DXT_MUI_DASHBOARD }}'
